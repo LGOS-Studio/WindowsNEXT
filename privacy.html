@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windows NEXT — 隐私声明 | Geometry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.70);
+            --text-tertiary: rgba(255, 255, 255, 0.45);
+            --accent: #7bb8ff;
+            --radius-lg: 32px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: #080a10;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 30% 10%, rgba(40, 89, 179, 0.34) 0%, transparent 65%),
+                radial-gradient(ellipse 61% 55% at 74% 86%, rgba(126, 66, 203, 0.26) 0%, transparent 60%),
+                radial-gradient(ellipse 69% 40% at 11% 71%, rgba(18, 164, 224, 0.16) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 60% at 90% 23%, rgba(201, 139, 255, 0.11) 0%, transparent 50%),
+                linear-gradient(166deg, #060712 0%, #0b0f1c 42%, #090d20 72%, #03050d 100%);
+            animation: bgShift 24s ease-in-out infinite alternate;
+        }
+        @keyframes bgShift {
+            0% { transform: scale(1) rotate(0deg); filter: hue-rotate(-4deg) saturate(0.9); }
+            50% { transform: scale(1.03) rotate(0.4deg); filter: hue-rotate(4deg) saturate(1.1); }
+            100% { transform: scale(1) rotate(-0.3deg); filter: hue-rotate(-2deg) saturate(0.95); }
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(80px);
+            opacity: 0.25;
+            z-index: 0;
+            will-change: transform;
+        }
+        .orb--1 {
+            width: 544px;
+            height: 544px;
+            background: radial-gradient(circle, rgba(72, 153, 255, 0.258), transparent 78%);
+            top: -8%;
+            left: -5%;
+            animation: orbFloat1 26s ease-in-out infinite alternate;
+        }
+        .orb--2 {
+            width: 476px;
+            height: 476px;
+            background: radial-gradient(circle, rgba(180, 117, 244, 0.208), transparent 76%);
+            bottom: -10%;
+            right: -3%;
+            animation: orbFloat2 30s ease-in-out infinite alternate;
+        }
+        .orb--3 {
+            width: 306px;
+            height: 306px;
+            background: radial-gradient(circle, rgba(0, 215, 234, 0.142), transparent 73%);
+            top: 47%;
+            left: 58%;
+            animation: orbFloat3 34s ease-in-out infinite alternate;
+        }
+        @keyframes orbFloat1 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, 38px) scale(1.06); }
+            66% { transform: translate(-28px, 62px) scale(0.965); }
+            100% { transform: translate(36px, -22px) scale(1.02); }
+        }
+        @keyframes orbFloat2 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-52px, -46px) scale(1.04); }
+            66% { transform: translate(48px, -28px) scale(0.937); }
+            100% { transform: translate(-30px, 54px) scale(1.01); }
+        }
+        @keyframes orbFloat3 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(38px, -56px) scale(1.076); }
+            100% { transform: translate(-44px, 39px) scale(0.978); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.007) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.007) 1px, transparent 1px);
+            background-size: 64px 64px;
+            pointer-events: none;
+        }
+
+        .site-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 40px 100px;
+        }
+
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(1.6) brightness(1.2);
+            -webkit-backdrop-filter: blur(28px) saturate(1.6) brightness(1.2);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-lg);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+        }
+        .liquid-glass:hover {
+            border-color: rgba(255, 255, 255, 0.13);
+            box-shadow: 0 30px 68px -14px rgba(0, 0, 0, 0.548);
+            background: rgba(255, 255, 255, 0.056);
+        }
+
+        .liquid-glass--light {
+            background: rgba(255, 255, 255, 0.018);
+            backdrop-filter: blur(22px) saturate(1.5) brightness(1.15);
+            -webkit-backdrop-filter: blur(22px) saturate(1.5) brightness(1.15);
+            border: 1px solid rgba(255, 255, 255, 0.047);
+            box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.388);
+            border-radius: var(--radius-md);
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 36px;
+            margin-top: 28px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.028);
+            backdrop-filter: blur(32px) saturate(1.7) brightness(1.25);
+            -webkit-backdrop-filter: blur(32px) saturate(1.7) brightness(1.25);
+            border: 1px solid rgba(255, 255, 255, 0.061);
+            box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.498);
+            transition: all 0.35s ease;
+        }
+        .navbar:hover {
+            border-color: rgba(255, 255, 255, 0.124);
+            background: rgba(255, 255, 255, 0.043);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(138deg, #5588ff, #8844ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -0.5px;
+            color: #fff;
+            box-shadow: 0 0 24px rgba(100, 129, 255, 0.236);
+        }
+        .nav-brand-text {
+            font-weight: 639;
+            font-size: 19px;
+            letter-spacing: -0.3px;
+        }
+        .nav-brand-text span {
+            color: var(--text-tertiary);
+            font-weight: 441;
+            margin-left: 6px;
+            font-size: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 471;
+            padding: 8px 20px;
+            border-radius: 99px;
+            transition: all 0.25s ease;
+            letter-spacing: 0.2px;
+        }
+        .nav-links a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.058);
+        }
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.082);
+            font-weight: 523;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.044);
+        }
+        .nav-badge {
+            background: rgba(255, 223, 0, 0.074);
+            border: 1px solid rgba(255, 214, 45, 0.086);
+            color: #ffda6b;
+            font-size: 11px;
+            font-weight: 613;
+            padding: 4px 14px;
+            border-radius: 99px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-left: 4px;
+        }
+
+        .privacy-hero {
+            margin-top: 64px;
+            padding: 48px 52px 56px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .privacy-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            background: radial-gradient(ellipse 70% 60% at 48% 30%, rgba(117, 189, 255, 0.033), transparent 69%);
+            pointer-events: none;
+        }
+        .privacy-hero h1 {
+            font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+            font-weight: 714;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            background: linear-gradient(136deg, #ffffff 40%, rgba(198, 218, 255, 0.816), rgba(168, 193, 252, 0.579));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .privacy-hero p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 640px;
+            margin: 0 auto;
+            font-weight: 363;
+            line-height: 1.7;
+        }
+        .privacy-hero .last-updated {
+            display: inline-block;
+            margin-top: 18px;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            background: rgba(255, 255, 255, 0.024);
+            border: 1px solid rgba(255, 255, 255, 0.038);
+            border-radius: 99px;
+            padding: 5px 22px;
+            backdrop-filter: blur(4px);
+        }
+
+        .content-section {
+            margin-top: 36px;
+            padding: 40px 44px 44px;
+        }
+        .content-section h2 {
+            font-size: 24px;
+            font-weight: 641;
+            letter-spacing: -0.3px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .content-section h3 {
+            font-size: 18px;
+            font-weight: 573;
+            margin-top: 28px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        .content-section p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+        .content-section ul {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0 16px;
+        }
+        .content-section li {
+            position: relative;
+            padding-left: 26px;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .content-section li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: rgba(109, 169, 255, 0.458);
+            font-size: 14px;
+        }
+        .content-section a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer {
+            margin-top: 72px;
+            padding: 32px 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.011);
+            backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.029);
+            color: var(--text-tertiary);
+            font-size: 13px;
+            font-weight: 401;
+        }
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: #fff;
+        }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .footer-right {
+            display: flex;
+            gap: 24px;
+        }
+
+        @media (max-width: 770px) {
+            .site-wrapper {
+                padding: 0 20px 60px;
+            }
+            .navbar {
+                padding: 14px 22px;
+                flex-wrap: wrap;
+                gap: 10px;
+                border-radius: 40px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .nav-links a {
+                font-size: 13px;
+                padding: 6px 14px;
+            }
+            .privacy-hero {
+                padding: 36px 20px 44px;
+            }
+            .content-section {
+                padding: 28px 20px 32px;
+            }
+            .footer {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 24px 28px;
+            }
+            .footer-left {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .footer-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .privacy-hero {
+                padding: 28px 16px 36px;
+            }
+            .content-section {
+                padding: 20px 14px 24px;
+            }
+            .nav-badge {
+                font-size: 9px;
+                padding: 2px 10px;
+            }
+            .navbar {
+                border-radius: 28px;
+                padding: 12px 16px;
+            }
+            .nav-brand-text {
+                font-size: 16px;
+            }
+            .nav-brand-text span {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-canvas"></div>
+    <div class="orb orb--1"></div>
+    <div class="orb orb--2"></div>
+    <div class="orb orb--3"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="site-wrapper">
+
+        <header class="navbar">
+            <a href="/WindowsNEXT" class="nav-brand">
+                <div class="nav-logo">N</div>
+                <span class="nav-brand-text">Windows NEXT <span>| Geometry</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/WindowsNEXT">概述</a></li>
+                <li><a href="/WindowsNEXT/discover.html">发现</a></li>
+                <li><a href="/WindowsNEXT/developers.html">开发者</a></li>
+                <li><span class="nav-badge">Beta</span></li>
+            </ul>
+        </header>
+
+        <section class="privacy-hero liquid-glass">
+            <h1>隐私声明</h1>
+            <p>LGOS Studio 尊重并保护您的隐私。本声明说明了 Windows NEXT 在 Beta 阶段如何收集、使用和保护您的个人信息。</p>
+            <span class="last-updated">最后更新：2026 年 7 月 5 日</span>
+        </section>
+
+        <section class="content-section liquid-glass">
+            <h2>1. 我们收集的信息</h2>
+            <p>在您使用 Windows NEXT Beta 的过程中，我们可能会收集以下类别的信息以改善产品体验：</p>
+            <ul>
+                <li><strong>设备信息：</strong> 硬件型号、操作系统版本、唯一设备标识符、区域设置。</li>
+                <li><strong>使用数据：</strong> 功能使用频率、崩溃报告、性能指标、错误日志。</li>
+                <li><strong>账户信息：</strong> 如果您选择登录 Microsoft 账户，我们将收集账户别名和相关配置文件信息。</li>
+                <li><strong>诊断数据：</strong> 系统健康状态、驱动程序信息、网络连接质量。</li>
+            </ul>
+            <p>我们不会故意收集任何敏感个人数据（如种族、宗教信仰、政治观点）。</p>
+
+            <h2>2. 信息的用途</h2>
+            <p>收集的数据用于以下目的：</p>
+            <ul>
+                <li>提供、维护和改进 Windows NEXT 操作系统及其服务。</li>
+                <li>分析趋势并诊断技术问题，以确保系统稳定性和安全性。</li>
+                <li>向您推送 Beta 版本更新、安全补丁和重要通知。</li>
+                <li>根据使用情况优化液态玻璃引擎、手势识别等核心功能的性能。</li>
+            </ul>
+
+            <h2>3. 数据共享与披露</h2>
+            <p>LGOS Studio 不会将您的个人数据出售给第三方。在以下情形下，我们可能会共享必要信息：</p>
+            <ul>
+                <li>得到您的明确同意。</li>
+                <li>法律要求或为保护合法权益（如应对诉讼、防止欺诈）。</li>
+                <li>与代表我们处理数据的可信服务提供商（如云存储、崩溃分析）共享，且这些提供商受合同约束。</li>
+            </ul>
+
+            <h2>4. 数据存储与安全</h2>
+            <p>您的数据存储在中国大陆境内的服务器上，并采用行业标准的安全措施：</p>
+            <ul>
+                <li>传输过程中使用 TLS 1.3 加密。</li>
+                <li>静态数据使用 AES-256 加密。</li>
+                <li>定期进行安全审计与渗透测试。</li>
+            </ul>
+            <p>我们会在 Beta 阶段结束后 90 天内删除或匿名化收集的诊断数据，除非法律另有规定。</p>
+
+            <h2>5. 您的权利</h2>
+            <p>根据适用法律，您享有以下权利：</p>
+            <ul>
+                <li><strong>访问权：</strong> 请求获取我们持有的关于您的个人数据副本。</li>
+                <li><strong>更正权：</strong> 要求更正不准确的个人信息。</li>
+                <li><strong>删除权：</strong> 在特定条件下要求删除您的个人数据。</li>
+                <li><strong>撤回同意：</strong> 您可以通过系统设置中的“隐私仪表盘”随时撤回对诊断数据的收集同意。</li>
+            </ul>
+            <p>如需行使上述权利，请发送邮件至 <a href="mailto:2920160872@qq.com">我们的邮箱</a>，我们将在 30 天内回复。</p>
+
+            <h2>6. 儿童隐私</h2>
+            <p>Windows NEXT 不面向 13 周岁以下的儿童。如果我们发现无意中收集了儿童的个人数据，将立即删除。</p>
+
+            <h2>7. 政策更新</h2>
+            <p>本隐私声明可能不时更新。重大变更将通过系统通知或官方网站公布。继续使用 Beta 版本即表示您同意更新后的条款。</p>
+
+            <h2>8. 联系方式</h2>
+            <p>如有任何疑问或关切，请联系我们的开发团队：</p>
+            <p>
+                📧 <a href="https://qm.qq.com/q/Ta1H2YZaMy">LGOS Studio 交流群</a><br />
+                🕐 工作日 10:00 – 18:00 (UTC+8)
+            </p>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-left">
+                <span>© 2026 LGOS Studio</span>
+                <span>·</span>
+                <span>Windows NEXT <span style="opacity:0.5;">Geometry</span></span>
+            </div>
+            <div class="footer-right">
+                <a href="/WindowsNEXT/privacy.html">隐私声明</a>
+                <a href="/WindowsNEXT/terms.html">使用条款</a>
+                <a href="/WindowsNEXT/contact.html">联系团队</a>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>

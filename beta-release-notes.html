@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windows NEXT — Beta 发行说明 | Geometry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Reset & Base ── */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.70);
+            --text-tertiary: rgba(255, 255, 255, 0.45);
+            --accent: #7bb8ff;
+            --radius-lg: 32px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: #080a10;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        /* ── 动态渐变背景 ── */
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 30% 10%, rgba(40, 89, 179, 0.34) 0%, transparent 65%),
+                radial-gradient(ellipse 61% 55% at 74% 86%, rgba(126, 66, 203, 0.26) 0%, transparent 60%),
+                radial-gradient(ellipse 69% 40% at 11% 71%, rgba(18, 164, 224, 0.16) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 60% at 90% 23%, rgba(201, 139, 255, 0.11) 0%, transparent 50%),
+                linear-gradient(166deg, #060712 0%, #0b0f1c 42%, #090d20 72%, #03050d 100%);
+            animation: bgShift 24s ease-in-out infinite alternate;
+        }
+        @keyframes bgShift {
+            0% { transform: scale(1) rotate(0deg); filter: hue-rotate(-4deg) saturate(0.9); }
+            50% { transform: scale(1.03) rotate(0.4deg); filter: hue-rotate(4deg) saturate(1.1); }
+            100% { transform: scale(1) rotate(-0.3deg); filter: hue-rotate(-2deg) saturate(0.95); }
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(80px);
+            opacity: 0.25;
+            z-index: 0;
+            will-change: transform;
+        }
+        .orb--1 {
+            width: 555px;
+            height: 555px;
+            background: radial-gradient(circle, rgba(72, 153, 255, 0.265), transparent 78%);
+            top: -8%;
+            left: -5%;
+            animation: orbFloat1 26s ease-in-out infinite alternate;
+        }
+        .orb--2 {
+            width: 485px;
+            height: 485px;
+            background: radial-gradient(circle, rgba(180, 117, 244, 0.213), transparent 76%);
+            bottom: -10%;
+            right: -3%;
+            animation: orbFloat2 30s ease-in-out infinite alternate;
+        }
+        .orb--3 {
+            width: 315px;
+            height: 315px;
+            background: radial-gradient(circle, rgba(0, 215, 233, 0.147), transparent 73%);
+            top: 46%;
+            left: 58%;
+            animation: orbFloat3 34s ease-in-out infinite alternate;
+        }
+        @keyframes orbFloat1 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, 38px) scale(1.06); }
+            66% { transform: translate(-28px, 62px) scale(0.96); }
+            100% { transform: translate(36px, -22px) scale(1.02); }
+        }
+        @keyframes orbFloat2 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-52px, -46px) scale(1.04); }
+            66% { transform: translate(48px, -28px) scale(0.935); }
+            100% { transform: translate(-30px, 54px) scale(1.01); }
+        }
+        @keyframes orbFloat3 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(38px, -56px) scale(1.082); }
+            100% { transform: translate(-44px, 39px) scale(0.975); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.008) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.008) 1px, transparent 1px);
+            background-size: 64px 64px;
+            pointer-events: none;
+        }
+
+        .site-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 0 40px 100px;
+        }
+
+        /* ── 液态玻璃 ── */
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(1.6) brightness(1.2);
+            -webkit-backdrop-filter: blur(28px) saturate(1.6) brightness(1.2);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-lg);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+        }
+        .liquid-glass:hover {
+            border-color: rgba(255, 255, 255, 0.13);
+            box-shadow: 0 30px 68px -14px rgba(0, 0, 0, 0.545);
+            background: rgba(255, 255, 255, 0.057);
+        }
+
+        .liquid-glass--light {
+            background: rgba(255, 255, 255, 0.019);
+            backdrop-filter: blur(22px) saturate(1.5) brightness(1.15);
+            -webkit-backdrop-filter: blur(22px) saturate(1.5) brightness(1.15);
+            border: 1px solid rgba(255, 255, 255, 0.049);
+            box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.385);
+            border-radius: var(--radius-md);
+        }
+
+        /* ── 导航 ── */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 36px;
+            margin-top: 28px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.029);
+            backdrop-filter: blur(32px) saturate(1.7) brightness(1.25);
+            -webkit-backdrop-filter: blur(32px) saturate(1.7) brightness(1.25);
+            border: 1px solid rgba(255, 255, 255, 0.063);
+            box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.495);
+            transition: all 0.35s ease;
+        }
+        .navbar:hover {
+            border-color: rgba(255, 255, 255, 0.127);
+            background: rgba(255, 255, 255, 0.044);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(138deg, #5588ff, #8844ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -0.5px;
+            color: #fff;
+            box-shadow: 0 0 24px rgba(100, 129, 255, 0.243);
+        }
+        .nav-brand-text {
+            font-weight: 642;
+            font-size: 19px;
+            letter-spacing: -0.3px;
+        }
+        .nav-brand-text span {
+            color: var(--text-tertiary);
+            font-weight: 442;
+            margin-left: 6px;
+            font-size: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 472;
+            padding: 8px 20px;
+            border-radius: 99px;
+            transition: all 0.25s ease;
+            letter-spacing: 0.2px;
+        }
+        .nav-links a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.059);
+        }
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.083);
+            font-weight: 525;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.045);
+        }
+        .nav-badge {
+            background: rgba(255, 219, 0, 0.088);
+            border: 1px solid rgba(255, 210, 43, 0.097);
+            color: #ffda6b;
+            font-size: 11px;
+            font-weight: 614;
+            padding: 4px 14px;
+            border-radius: 99px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-left: 4px;
+        }
+
+        /* ── Hero ── */
+        .release-hero {
+            margin-top: 64px;
+            padding: 48px 52px 56px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .release-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            background: radial-gradient(ellipse 70% 60% at 48% 30%, rgba(117, 189, 255, 0.035), transparent 69%);
+            pointer-events: none;
+        }
+        .release-hero h1 {
+            font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+            font-weight: 715;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 12px;
+            background: linear-gradient(136deg, #ffffff 40%, rgba(198, 218, 255, 0.815), rgba(168, 193, 252, 0.585));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .release-hero .version-badge {
+            display: inline-block;
+            background: rgba(133, 186, 255, 0.094);
+            border: 1px solid rgba(133, 186, 255, 0.087);
+            border-radius: 99px;
+            padding: 6px 24px;
+            font-size: 15px;
+            font-weight: 505;
+            color: #b6d4ff;
+            margin-bottom: 16px;
+            backdrop-filter: blur(4px);
+        }
+        .release-hero p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 364;
+            line-height: 1.7;
+        }
+
+        /* ── 版本信息表 ── */
+        .info-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 32px 0 20px;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.014);
+            border: 1px solid rgba(255, 255, 255, 0.027);
+            backdrop-filter: blur(8px);
+        }
+        .info-item .label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-weight: 435;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 4px;
+        }
+        .info-item .value {
+            font-size: 16px;
+            font-weight: 515;
+            color: var(--text-primary);
+        }
+
+        /* ── 章节 ── */
+        .section-block {
+            margin-top: 36px;
+            padding: 40px 44px 44px;
+        }
+        .section-block h2 {
+            font-size: 24px;
+            font-weight: 640;
+            letter-spacing: -0.3px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .section-block h3 {
+            font-size: 18px;
+            font-weight: 575;
+            margin-top: 28px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+        .section-block p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+        .section-block ul {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0 16px;
+        }
+        .section-block li {
+            position: relative;
+            padding-left: 26px;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .section-block li::before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: rgba(109, 169, 255, 0.463);
+            font-size: 14px;
+        }
+        .section-block .tag-new {
+            display: inline-block;
+            background: rgba(74, 199, 112, 0.096);
+            border: 1px solid rgba(74, 199, 112, 0.092);
+            color: #6bdb8a;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 12px;
+            border-radius: 99px;
+            margin-left: 6px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+        .section-block .tag-fix {
+            display: inline-block;
+            background: rgba(241, 197, 60, 0.086);
+            border: 1px solid rgba(242, 199, 63, 0.079);
+            color: #f5ce5a;
+            font-size: 11px;
+            font-weight: 598;
+            padding: 2px 12px;
+            border-radius: 99px;
+            margin-left: 6px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+        .section-block .tag-known {
+            display: inline-block;
+            background: rgba(239, 151, 84, 0.077);
+            border: 1px solid rgba(237, 152, 87, 0.071);
+            color: #edb176;
+            font-size: 11px;
+            font-weight: 592;
+            padding: 2px 12px;
+            border-radius: 99px;
+            margin-left: 6px;
+            vertical-align: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        /* ── 下载按钮 ── */
+        .download-area {
+            margin-top: 36px;
+            text-align: center;
+        }
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 44px;
+            border-radius: 99px;
+            font-size: 18px;
+            font-weight: 568;
+            text-decoration: none;
+            background: linear-gradient(142deg, #4680ff, #7740ee);
+            color: #fff;
+            box-shadow: 0 10px 36px -6px rgba(70, 108, 255, 0.285);
+            border: none;
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 48px -6px rgba(70, 108, 255, 0.382);
+        }
+        .btn-download small {
+            font-size: 13px;
+            font-weight: 394;
+            opacity: 0.7;
+        }
+
+        /* ── Footer ── */
+        .footer {
+            margin-top: 72px;
+            padding: 32px 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.012);
+            backdrop-filter: blur(16px) saturate(1.3);
+            border: 1px solid rgba(255, 255, 255, 0.031);
+            color: var(--text-tertiary);
+            font-size: 13px;
+            font-weight: 397;
+        }
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: #fff;
+        }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .footer-right {
+            display: flex;
+            gap: 24px;
+        }
+
+        /* ── 响应式 ── */
+        @media (max-width: 780px) {
+            .site-wrapper {
+                padding: 0 20px 60px;
+            }
+            .navbar {
+                padding: 14px 22px;
+                flex-wrap: wrap;
+                gap: 10px;
+                border-radius: 40px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .nav-links a {
+                font-size: 13px;
+                padding: 6px 14px;
+            }
+            .release-hero {
+                padding: 36px 20px 44px;
+            }
+            .info-table {
+                grid-template-columns: 1fr;
+            }
+            .section-block {
+                padding: 28px 20px 32px;
+            }
+            .footer {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 24px 28px;
+            }
+            .footer-left {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .footer-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .release-hero {
+                padding: 28px 16px 36px;
+            }
+            .section-block {
+                padding: 20px 14px 24px;
+            }
+            .nav-badge {
+                font-size: 9px;
+                padding: 2px 10px;
+            }
+            .navbar {
+                border-radius: 28px;
+                padding: 12px 16px;
+            }
+            .nav-brand-text {
+                font-size: 16px;
+            }
+            .nav-brand-text span {
+                font-size: 12px;
+            }
+            .btn-download {
+                padding: 14px 30px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-canvas"></div>
+    <div class="orb orb--1"></div>
+    <div class="orb orb--2"></div>
+    <div class="orb orb--3"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="site-wrapper">
+
+        <!-- ─── 导航 ─── -->
+        <header class="navbar">
+            <a href="/WindowsNEXT" class="nav-brand">
+                <div class="nav-logo">N</div>
+                <span class="nav-brand-text">Windows NEXT <span>| Geometry</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/WindowsNEXT">概述</a></li>
+                <li><a href="/WindowsNEXT/discover.html">发现</a></li>
+                <li><a href="/WindowsNEXT/developers.html">开发者</a></li>
+                <li><span class="nav-badge">Beta</span></li>
+            </ul>
+        </header>
+
+        <!-- ─── Hero ─── -->
+        <section class="release-hero liquid-glass">
+            <div class="version-badge">Beta Build 10.0.22000.3260</div>
+            <h1>发行说明</h1>
+            <p>Geometry 公测版本的变更日志、新功能、修复与已知问题。</p>
+        </section>
+
+        <!-- ─── 版本信息表 ─── -->
+        <div class="info-table">
+            <div class="info-item">
+                <span class="label">版本号</span>
+                <span class="value">10.0.22000.3260 (Beta)</span>
+            </div>
+            <div class="info-item">
+                <span class="label">发布日期</span>
+                <span class="value">2026 年 7 月 5 日</span>
+            </div>
+            <div class="info-item">
+                <span class="label">开发代号</span>
+                <span class="value">Geometry</span>
+            </div>
+            <div class="info-item">
+                <span class="label">支持终止</span>
+                <span class="value">2026 年 8 月 20 日 (Beta 结束)</span>
+            </div>
+        </div>
+
+        <!-- ─── 新增功能 ─── -->
+        <section class="section-block liquid-glass">
+            <h2>✨ 新增功能</h2>
+            <ul>
+                <li><strong>智慧工作台</strong> — 根据当前任务自动调整桌面布局与虚拟桌面。 <span class="tag-new">New</span></li>
+                <li><strong>实时字幕与翻译</strong> — 系统级实时字幕，支持 40+ 语言互译。 <span class="tag-new">New</span></li>
+                <li><strong>手势宇宙</strong> — 统一触控板/鼠标/触控屏手势引擎，三指轻扫切换桌面。 <span class="tag-new">New</span></li>
+                <li><strong>语义文件管理</strong> — 自然语言搜索：「上周修改的表格」「带图表的市场报告」。 <span class="tag-new">New</span></li>
+                <li><strong>空间音频引擎</strong> — 系统级空间音频，支持任意耳机，视频会议与游戏沉浸感提升。 <span class="tag-new">New</span></li>
+                <li><strong>隐私仪表盘</strong> — 统一查看所有应用权限调用记录，随时收回授权。</li>
+                <li><strong>动态材质引擎</strong> — 液态玻璃效果全面覆盖系统 UI，支持第三方应用接入。</li>
+            </ul>
+        </section>
+
+        <!-- ─── 改进与修复 ─── -->
+        <section class="section-block liquid-glass">
+            <h2>🔧 改进与修复</h2>
+            <ul>
+                <li>修复了在某些 AMD GPU 上窗口渲染闪烁的问题。 <span class="tag-fix">Fix</span></li>
+                <li>优化了多显示器环境下 DPI 缩放的一致性。</li>
+                <li>改进了 Edge 浏览器在 Geometry 内核下的滚动性能，帧率提升 22%。</li>
+                <li>修复了文件资源管理器在深色模式下标题栏颜色异常。 <span class="tag-fix">Fix</span></li>
+                <li>更新了触摸键盘布局，增加对法语、德语、日语的支持。</li>
+                <li>降低了后台进程的内存占用，平均节省约 180 MB。</li>
+                <li>修复了部分 UWP 应用无法正确加载液态玻璃背景的问题。 <span class="tag-fix">Fix</span></li>
+            </ul>
+        </section>
+
+        <!-- ─── 已知问题 ─── -->
+        <section class="section-block liquid-glass">
+            <h2>⚠️ 已知问题</h2>
+            <ul>
+                <li>部分旧版打印机驱动程序（2019 年前发布）可能无法正常安装。 <span class="tag-known">Known</span></li>
+                <li>ARM64 设备上的 x86 仿真性能低于预期，团队正在优化。 <span class="tag-known">Known</span></li>
+                <li>在某些高刷新率显示器（≥240Hz）上，窗口动画偶现轻微卡顿。 <span class="tag-known">Known</span></li>
+                <li>企业级组策略编辑器（GPEdit.msc）的部分条目尚未本地化。 <span class="tag-known">Known</span></li>
+                <li>Windows Sandbox 在当前版本中不可用，将在后续更新中恢复。 <span class="tag-known">Known</span></li>
+                <li>部分第三方杀毒软件可能与 Geometry 内核的安全机制产生冲突，建议暂时使用 Windows Defender。</li>
+            </ul>
+        </section>
+
+        <!-- ─── 下载 ─── -->
+        <div class="download-area">
+            <a class="btn-download" href="/Beta/winnext-beta1.html" target="_blank">
+                ⬇️ 下载 Beta 镜像
+                <small>4.4 GB · ISO</small>
+            </a>
+            <p style="margin-top:16px; color:var(--text-tertiary); font-size:13px;">
+                不需要 Insider 账户 · 安装前请阅读 <a href="/WindowsNEXT/system-requirements.html" style="color:var(--accent);">系统要求</a>
+            </p>
+        </div>
+
+        <!-- ─── Footer ─── -->
+        <footer class="footer">
+            <div class="footer-left">
+                <span>© 2026 LGOS Studio</span>
+                <span>·</span>
+                <span>Windows NEXT <span style="opacity:0.5;">Geometry</span></span>
+            </div>
+            <div class="footer-right">
+                <a href="#">隐私声明</a>
+                <a href="#">使用条款</a>
+                <a href="#">联系团队</a>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>

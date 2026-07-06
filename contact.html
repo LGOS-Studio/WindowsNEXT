@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Windows NEXT — 联系团队 | Geometry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.70);
+            --text-tertiary: rgba(255, 255, 255, 0.45);
+            --accent: #7bb8ff;
+            --radius-lg: 32px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font);
+            background: #080a10;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.5;
+        }
+
+        .bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 30% 10%, rgba(40, 89, 179, 0.332) 0%, transparent 65%),
+                radial-gradient(ellipse 61% 55% at 74% 86%, rgba(126, 66, 203, 0.259) 0%, transparent 60%),
+                radial-gradient(ellipse 69% 40% at 11% 71%, rgba(18, 164, 227, 0.153) 0%, transparent 55%),
+                radial-gradient(ellipse 50% 60% at 90% 23%, rgba(201, 139, 255, 0.106) 0%, transparent 50%),
+                linear-gradient(166deg, #060712 0%, #0b0f1c 42%, #090d20 72%, #03050d 100%);
+            animation: bgShift 24s ease-in-out infinite alternate;
+        }
+        @keyframes bgShift {
+            0% { transform: scale(1) rotate(0deg); filter: hue-rotate(-4deg) saturate(0.895); }
+            50% { transform: scale(1.03) rotate(0.4deg); filter: hue-rotate(4deg) saturate(1.098); }
+            100% { transform: scale(1) rotate(-0.3deg); filter: hue-rotate(-2deg) saturate(0.942); }
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(80px);
+            opacity: 0.25;
+            z-index: 0;
+            will-change: transform;
+        }
+        .orb--1 {
+            width: 532px;
+            height: 532px;
+            background: radial-gradient(circle, rgba(72, 153, 255, 0.263), transparent 78%);
+            top: -8%;
+            left: -5%;
+            animation: orbFloat1 26s ease-in-out infinite alternate;
+        }
+        .orb--2 {
+            width: 478px;
+            height: 478px;
+            background: radial-gradient(circle, rgba(180, 117, 244, 0.204), transparent 76%);
+            bottom: -10%;
+            right: -3%;
+            animation: orbFloat2 30s ease-in-out infinite alternate;
+        }
+        .orb--3 {
+            width: 302px;
+            height: 302px;
+            background: radial-gradient(circle, rgba(0, 215, 228, 0.136), transparent 73%);
+            top: 47%;
+            left: 58%;
+            animation: orbFloat3 34s ease-in-out infinite alternate;
+        }
+        @keyframes orbFloat1 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(60px, 38px) scale(1.06); }
+            66% { transform: translate(-28px, 62px) scale(0.962); }
+            100% { transform: translate(36px, -22px) scale(1.02); }
+        }
+        @keyframes orbFloat2 {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-52px, -46px) scale(1.04); }
+            66% { transform: translate(48px, -28px) scale(0.932); }
+            100% { transform: translate(-30px, 54px) scale(1.01); }
+        }
+        @keyframes orbFloat3 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(38px, -56px) scale(1.071); }
+            100% { transform: translate(-44px, 39px) scale(0.974); }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+            background-size: 64px 64px;
+            pointer-events: none;
+        }
+
+        .site-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 0 40px 100px;
+        }
+
+        .liquid-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px) saturate(1.6) brightness(1.2);
+            -webkit-backdrop-filter: blur(28px) saturate(1.6) brightness(1.2);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            border-radius: var(--radius-lg);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+        }
+        .liquid-glass:hover {
+            border-color: rgba(255, 255, 255, 0.125);
+            box-shadow: 0 30px 68px -14px rgba(0, 0, 0, 0.546);
+            background: rgba(255, 255, 255, 0.054);
+        }
+
+        .liquid-glass--light {
+            background: rgba(255, 255, 255, 0.016);
+            backdrop-filter: blur(22px) saturate(1.5) brightness(1.15);
+            -webkit-backdrop-filter: blur(22px) saturate(1.5) brightness(1.15);
+            border: 1px solid rgba(255, 255, 255, 0.043);
+            box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.386);
+            border-radius: var(--radius-md);
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 36px;
+            margin-top: 28px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.026);
+            backdrop-filter: blur(32px) saturate(1.7) brightness(1.25);
+            -webkit-backdrop-filter: blur(32px) saturate(1.7) brightness(1.25);
+            border: 1px solid rgba(255, 255, 255, 0.057);
+            box-shadow: 0 20px 50px -14px rgba(0, 0, 0, 0.506);
+            transition: all 0.345s ease;
+        }
+        .navbar:hover {
+            border-color: rgba(255, 255, 255, 0.119);
+            background: rgba(255, 255, 255, 0.041);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+        .nav-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(138deg, #5588ff, #8844ee);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 696;
+            font-size: 17px;
+            letter-spacing: -0.5px;
+            color: #fff;
+            box-shadow: 0 0 24px rgba(100, 129, 255, 0.222);
+        }
+        .nav-brand-text {
+            font-weight: 634;
+            font-size: 19px;
+            letter-spacing: -0.3px;
+        }
+        .nav-brand-text span {
+            color: var(--text-tertiary);
+            font-weight: 437;
+            margin-left: 6px;
+            font-size: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 467;
+            padding: 8px 20px;
+            border-radius: 99px;
+            transition: all 0.245s ease;
+            letter-spacing: 0.2px;
+        }
+        .nav-links a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.054);
+        }
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.077);
+            font-weight: 519;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }
+        .nav-badge {
+            background: rgba(255, 228, 0, 0.064);
+            border: 1px solid rgba(255, 218, 47, 0.076);
+            color: #ffda6b;
+            font-size: 11px;
+            font-weight: 609;
+            padding: 4px 14px;
+            border-radius: 99px;
+            letter-spacing: 0.404px;
+            text-transform: uppercase;
+            margin-left: 4px;
+        }
+
+        .contact-hero {
+            margin-top: 64px;
+            padding: 48px 52px 56px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: var(--radius-lg);
+            background: radial-gradient(ellipse 70% 60% at 48% 30%, rgba(117, 189, 255, 0.031), transparent 69%);
+            pointer-events: none;
+        }
+        .contact-hero h1 {
+            font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+            font-weight: 713;
+            letter-spacing: -1px;
+            line-height: 1.099;
+            margin-bottom: 12px;
+            background: linear-gradient(136deg, #ffffff 40%, rgba(198, 218, 255, 0.813), rgba(168, 193, 252, 0.574));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .contact-hero p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 359;
+            line-height: 1.694;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 36px;
+        }
+
+        .contact-info {
+            padding: 40px 36px 44px;
+        }
+        .contact-info h2 {
+            font-size: 22px;
+            font-weight: 632;
+            letter-spacing: -0.2px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .contact-info .info-block {
+            margin-bottom: 24px;
+        }
+        .contact-info .info-block .label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.304px;
+            font-weight: 454;
+            margin-bottom: 4px;
+        }
+        .contact-info .info-block .value {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 418;
+        }
+        .contact-info .info-block .value a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .contact-info .social-links {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .contact-info .social-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.024);
+            border: 1px solid rgba(255, 255, 255, 0.038);
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 455;
+            text-decoration: none;
+            transition: all 0.274s ease;
+            backdrop-filter: blur(4px);
+        }
+        .contact-info .social-links a:hover {
+            background: rgba(255, 255, 255, 0.046);
+            border-color: rgba(255, 255, 255, 0.064);
+            color: #fff;
+        }
+
+        .contact-form {
+            padding: 40px 36px 44px;
+        }
+        .contact-form h2 {
+            font-size: 22px;
+            font-weight: 633;
+            letter-spacing: -0.2px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            font-weight: 453;
+            margin-bottom: 6px;
+            letter-spacing: 0.2px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.028);
+            border: 1px solid rgba(255, 255, 255, 0.059);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color 0.278s ease, background 0.279s ease;
+            backdrop-filter: blur(8px);
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: rgba(123, 184, 255, 0.346);
+            background: rgba(255, 255, 255, 0.038);
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-tertiary);
+            opacity: 0.587;
+        }
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.354)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            cursor: pointer;
+        }
+        .form-group select option {
+            background: #141824;
+            color: #fff;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 36px;
+            border-radius: 99px;
+            font-size: 16px;
+            font-weight: 541;
+            border: none;
+            background: linear-gradient(142deg, #4680ff, #7740ee);
+            color: #fff;
+            box-shadow: 0 8px 32px -6px rgba(70, 108, 255, 0.273);
+            cursor: default;
+            transition: all 0.307s ease;
+            margin-top: 6px;
+        }
+        .form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 42px -6px rgba(70, 108, 255, 0.367);
+        }
+
+        .map-section {
+            margin-top: 36px;
+            padding: 36px 40px 40px;
+        }
+        .map-section h2 {
+            font-size: 22px;
+            font-weight: 631;
+            letter-spacing: -0.2px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        .map-placeholder {
+            width: 100%;
+            height: 200px;
+            border-radius: var(--radius-sm);
+            background:
+                radial-gradient(circle at 30% 40%, rgba(72, 153, 255, 0.093), transparent 59%),
+                radial-gradient(circle at 70% 60%, rgba(180, 117, 244, 0.067), transparent 55%),
+                linear-gradient(142deg, rgba(255, 255, 255, 0.013), rgba(255, 255, 255, 0.001));
+            border: 1px solid rgba(255, 255, 255, 0.031);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            font-size: 14px;
+            font-weight: 412;
+            backdrop-filter: blur(6px);
+        }
+
+        .footer {
+            margin-top: 72px;
+            padding: 32px 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.009);
+            backdrop-filter: blur(16px) saturate(1.298);
+            border: 1px solid rgba(255, 255, 255, 0.025);
+            color: var(--text-tertiary);
+            font-size: 13px;
+            font-weight: 406;
+        }
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer a:hover {
+            color: #fff;
+        }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .footer-right {
+            display: flex;
+            gap: 24px;
+        }
+
+        @media (max-width: 840px) {
+            .site-wrapper {
+                padding: 0 20px 60px;
+            }
+            .navbar {
+                padding: 14px 22px;
+                flex-wrap: wrap;
+                gap: 10px;
+                border-radius: 40px;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .nav-links a {
+                font-size: 13px;
+                padding: 6px 14px;
+            }
+            .contact-hero {
+                padding: 36px 20px 44px;
+            }
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            .contact-info,
+            .contact-form,
+            .map-section {
+                padding: 28px 24px 32px;
+            }
+            .footer {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 24px 28px;
+            }
+            .footer-left {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .footer-right {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 466px) {
+            .contact-hero {
+                padding: 28px 16px 36px;
+            }
+            .contact-info,
+            .contact-form,
+            .map-section {
+                padding: 20px 16px 24px;
+            }
+            .nav-badge {
+                font-size: 9px;
+                padding: 2px 10px;
+            }
+            .navbar {
+                border-radius: 28px;
+                padding: 12px 16px;
+            }
+            .nav-brand-text {
+                font-size: 16px;
+            }
+            .nav-brand-text span {
+                font-size: 12px;
+            }
+            .contact-info .social-links a {
+                padding: 6px 14px;
+                font-size: 13px;
+            }
+            .form-submit {
+                padding: 12px 28px;
+                font-size: 15px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-canvas"></div>
+    <div class="orb orb--1"></div>
+    <div class="orb orb--2"></div>
+    <div class="orb orb--3"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="site-wrapper">
+
+        <header class="navbar">
+            <a href="/WindowsNEXT" class="nav-brand">
+                <div class="nav-logo">N</div>
+                <span class="nav-brand-text">Windows NEXT <span>| Geometry</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="/WindowsNEXT">概述</a></li>
+                <li><a href="/WindowsNEXT/discover.html">发现</a></li>
+                <li><a href="/WindowsNEXT/developers.html">开发者</a></li>
+                <li><span class="nav-badge">Beta</span></li>
+            </ul>
+        </header>
+
+        <section class="contact-hero liquid-glass">
+            <h1>📬 联系团队</h1>
+            <p>无论您是用户、开发者还是媒体朋友，我们都期待听到您的声音。以下方式均可找到我们。</p>
+        </section>
+
+        <div class="contact-grid">
+            <!-- 左侧：联系信息 -->
+            <div class="contact-info liquid-glass">
+                <h2>📞 联系方式</h2>
+                <div class="info-block">
+                    <div class="label">电子邮件</div>
+                    <div class="value">
+                        咨询：<a href="mailto:2920160872@qq.com">2920160872@qq.com</a><br />
+                    </div>
+                </div>
+                <div class="info-block">
+                    <div class="label">办公地址</div>
+                    <div class="value">
+                        LGOS Studio<br />
+                        遍布天南海北 :D
+                    </div>
+                </div>
+                <div class="info-block">
+                    <div class="label">工作时间</div>
+                    <div class="value">周一至周五 10:00 – 18:00 (UTC+8)</div>
+                </div>
+                <div class="info-block">
+                    <div class="label">社交媒体</div>
+                    <div class="social-links">
+                        <a href="https://qm.qq.com/q/Ta1H2YZaMy">🐧 QQ · 官方群组</a>
+                        <a href="https://space.bilibili.com/1066128216">📺 Bilibili · 技术顾问</a>
+                        <a href="https://github.com/LGOS-Studio">📘 GitHub · 开发者</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：联系表单 -->
+            <div class="contact-form liquid-glass">
+                <h2>✉️ 发送消息 （暂不可用）</h2>
+                <form onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="name">姓名</label>
+                        <input type="text" id="name" placeholder="您的姓名" />
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱</label>
+                        <input type="email" id="email" placeholder="your@email.com" />
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">主题</label>
+                        <select id="subject">
+                            <option value="">请选择主题</option>
+                            <option value="feedback">产品反馈</option>
+                            <option value="bug">错误报告</option>
+                            <option value="press">媒体垂询</option>
+                            <option value="partnership">合作意向</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">消息</label>
+                        <textarea id="message" placeholder="请详细描述您的问题或建议…"></textarea>
+                    </div>
+                    <button class="form-submit" type="button">📤 发送消息</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 地图区域 -->
+        <section class="map-section liquid-glass">
+            <h2>📍 我们的位置</h2>
+            <div class="map-placeholder">
+                🗺️ 我们在整个中国都有技术人员！:D
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-left">
+                <span>© 2026 LGOS Studio</span>
+                <span>·</span>
+                <span>Windows NEXT <span style="opacity:0.497;">Geometry</span></span>
+            </div>
+            <div class="footer-right">
+                <a href="/WindowsNEXT/privacy.html">隐私声明</a>
+                <a href="/WindowsNEXT/terms.html">使用条款</a>
+                <a href="/WindowsNEXT/contact.html">联系团队</a>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>
